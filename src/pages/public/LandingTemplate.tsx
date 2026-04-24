@@ -13,9 +13,9 @@
  *   2. Keep the ALTCHA widget — it's the spam gate. Do not remove, disable,
  *      or work around it.
  *   3. The POST URL pattern is fixed by the form-proxy contract:
- *      PROXY_BASE/api/rest/apps/APP_ID/records
- *   4. Add imports via the public:imports marker in App.tsx and
- *      routes via the public:routes marker. Never touch custom:* markers.
+ *      ${PROXY_BASE}/api/rest/apps/${APP_ID}/records
+ *   4. Add imports via the <public:imports> marker in App.tsx and
+ *      routes via <public:routes>. Never touch <custom:*> markers.
  *   5. Route path convention: `public/p/<slug>` (lowercase, hyphenated).
  */
 
@@ -24,13 +24,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-
 // ─── WIRING — agent must keep these three constants in sync with the target form-config ───
 // Matches settings.PROXY_BASE_URL; empty string → relative URL against the deploy host.
 const PROXY_BASE = '';
 // Replace with the app_id the landing page submits to. Must have an active
 // form-proxy hole with compatible allowed_fields.
-const APP_ID = '69eb4c352d3b185b8f5fd7fa';
+const APP_ID = '69eb4c3e268be590a3c278b2';
 const SUBMIT_PATH = `/rest/apps/${APP_ID}/records`;
 const ALTCHA_SCRIPT_SRC = 'https://cdn.jsdelivr.net/npm/altcha/dist/altcha.min.js';
 

@@ -26,6 +26,22 @@ export function enrichLieferanten(
   }));
 }
 
+interface BelegpositionenMaps {
+  belegeMap: Map<string, Belege>;
+  skr03KontenplanMap: Map<string, Skr03Kontenplan>;
+}
+
+export function enrichBelegpositionen(
+  belegpositionen: Belegpositionen[],
+  maps: BelegpositionenMaps
+): EnrichedBelegpositionen[] {
+  return belegpositionen.map(r => ({
+    ...r,
+    beleg_refName: resolveDisplay(r.fields.beleg_ref, maps.belegeMap, 'belegnummer_lieferant'),
+    skr03_konto_posName: resolveDisplay(r.fields.skr03_konto_pos, maps.skr03KontenplanMap, 'kontonummer'),
+  }));
+}
+
 interface BelegeMaps {
   lieferantenMap: Map<string, Lieferanten>;
   steuerperiodenMap: Map<string, Steuerperioden>;
@@ -41,22 +57,6 @@ export function enrichBelege(
     lieferant_refName: resolveDisplay(r.fields.lieferant_ref, maps.lieferantenMap, 'name'),
     steuerperiode_refName: resolveDisplay(r.fields.steuerperiode_ref, maps.steuerperiodenMap, 'bezeichnung'),
     skr03_konto_belegName: resolveDisplay(r.fields.skr03_konto_beleg, maps.skr03KontenplanMap, 'kontonummer'),
-  }));
-}
-
-interface BelegpositionenMaps {
-  belegeMap: Map<string, Belege>;
-  skr03KontenplanMap: Map<string, Skr03Kontenplan>;
-}
-
-export function enrichBelegpositionen(
-  belegpositionen: Belegpositionen[],
-  maps: BelegpositionenMaps
-): EnrichedBelegpositionen[] {
-  return belegpositionen.map(r => ({
-    ...r,
-    beleg_refName: resolveDisplay(r.fields.beleg_ref, maps.belegeMap, 'belegnummer_lieferant'),
-    skr03_konto_posName: resolveDisplay(r.fields.skr03_konto_pos, maps.skr03KontenplanMap, 'kontonummer'),
   }));
 }
 

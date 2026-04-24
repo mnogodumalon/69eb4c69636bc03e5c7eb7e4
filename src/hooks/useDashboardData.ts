@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import type { Skr03Kontenplan, Steuerperioden, Lieferanten, Belege, Belegpositionen, Leasingvertraege } from '@/types/app';
+import type { Lieferanten, Steuerperioden, Belegpositionen, Skr03Kontenplan, Belege, Leasingvertraege } from '@/types/app';
 import { LivingAppsService } from '@/services/livingAppsService';
 
 export function useDashboardData() {
-  const [skr03Kontenplan, setSkr03Kontenplan] = useState<Skr03Kontenplan[]>([]);
-  const [steuerperioden, setSteuerperioden] = useState<Steuerperioden[]>([]);
   const [lieferanten, setLieferanten] = useState<Lieferanten[]>([]);
-  const [belege, setBelege] = useState<Belege[]>([]);
+  const [steuerperioden, setSteuerperioden] = useState<Steuerperioden[]>([]);
   const [belegpositionen, setBelegpositionen] = useState<Belegpositionen[]>([]);
+  const [skr03Kontenplan, setSkr03Kontenplan] = useState<Skr03Kontenplan[]>([]);
+  const [belege, setBelege] = useState<Belege[]>([]);
   const [leasingvertraege, setLeasingvertraege] = useState<Leasingvertraege[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -15,19 +15,19 @@ export function useDashboardData() {
   const fetchAll = useCallback(async () => {
     setError(null);
     try {
-      const [skr03KontenplanData, steuerperiodenData, lieferantenData, belegeData, belegpositionenData, leasingvertraegeData] = await Promise.all([
-        LivingAppsService.getSkr03Kontenplan(),
-        LivingAppsService.getSteuerperioden(),
+      const [lieferantenData, steuerperiodenData, belegpositionenData, skr03KontenplanData, belegeData, leasingvertraegeData] = await Promise.all([
         LivingAppsService.getLieferanten(),
-        LivingAppsService.getBelege(),
+        LivingAppsService.getSteuerperioden(),
         LivingAppsService.getBelegpositionen(),
+        LivingAppsService.getSkr03Kontenplan(),
+        LivingAppsService.getBelege(),
         LivingAppsService.getLeasingvertraege(),
       ]);
-      setSkr03Kontenplan(skr03KontenplanData);
-      setSteuerperioden(steuerperiodenData);
       setLieferanten(lieferantenData);
-      setBelege(belegeData);
+      setSteuerperioden(steuerperiodenData);
       setBelegpositionen(belegpositionenData);
+      setSkr03Kontenplan(skr03KontenplanData);
+      setBelege(belegeData);
       setLeasingvertraege(leasingvertraegeData);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Fehler beim Laden der Daten'));
@@ -42,19 +42,19 @@ export function useDashboardData() {
   useEffect(() => {
     async function silentRefresh() {
       try {
-        const [skr03KontenplanData, steuerperiodenData, lieferantenData, belegeData, belegpositionenData, leasingvertraegeData] = await Promise.all([
-          LivingAppsService.getSkr03Kontenplan(),
-          LivingAppsService.getSteuerperioden(),
+        const [lieferantenData, steuerperiodenData, belegpositionenData, skr03KontenplanData, belegeData, leasingvertraegeData] = await Promise.all([
           LivingAppsService.getLieferanten(),
-          LivingAppsService.getBelege(),
+          LivingAppsService.getSteuerperioden(),
           LivingAppsService.getBelegpositionen(),
+          LivingAppsService.getSkr03Kontenplan(),
+          LivingAppsService.getBelege(),
           LivingAppsService.getLeasingvertraege(),
         ]);
-        setSkr03Kontenplan(skr03KontenplanData);
-        setSteuerperioden(steuerperiodenData);
         setLieferanten(lieferantenData);
-        setBelege(belegeData);
+        setSteuerperioden(steuerperiodenData);
         setBelegpositionen(belegpositionenData);
+        setSkr03Kontenplan(skr03KontenplanData);
+        setBelege(belegeData);
         setLeasingvertraege(leasingvertraegeData);
       } catch {
         // silently ignore — stale data is better than no data
@@ -65,11 +65,11 @@ export function useDashboardData() {
     return () => window.removeEventListener('dashboard-refresh', handleRefresh);
   }, []);
 
-  const skr03KontenplanMap = useMemo(() => {
-    const m = new Map<string, Skr03Kontenplan>();
-    skr03Kontenplan.forEach(r => m.set(r.record_id, r));
+  const lieferantenMap = useMemo(() => {
+    const m = new Map<string, Lieferanten>();
+    lieferanten.forEach(r => m.set(r.record_id, r));
     return m;
-  }, [skr03Kontenplan]);
+  }, [lieferanten]);
 
   const steuerperiodenMap = useMemo(() => {
     const m = new Map<string, Steuerperioden>();
@@ -77,11 +77,11 @@ export function useDashboardData() {
     return m;
   }, [steuerperioden]);
 
-  const lieferantenMap = useMemo(() => {
-    const m = new Map<string, Lieferanten>();
-    lieferanten.forEach(r => m.set(r.record_id, r));
+  const skr03KontenplanMap = useMemo(() => {
+    const m = new Map<string, Skr03Kontenplan>();
+    skr03Kontenplan.forEach(r => m.set(r.record_id, r));
     return m;
-  }, [lieferanten]);
+  }, [skr03Kontenplan]);
 
   const belegeMap = useMemo(() => {
     const m = new Map<string, Belege>();
@@ -89,5 +89,5 @@ export function useDashboardData() {
     return m;
   }, [belege]);
 
-  return { skr03Kontenplan, setSkr03Kontenplan, steuerperioden, setSteuerperioden, lieferanten, setLieferanten, belege, setBelege, belegpositionen, setBelegpositionen, leasingvertraege, setLeasingvertraege, loading, error, fetchAll, skr03KontenplanMap, steuerperiodenMap, lieferantenMap, belegeMap };
+  return { lieferanten, setLieferanten, steuerperioden, setSteuerperioden, belegpositionen, setBelegpositionen, skr03Kontenplan, setSkr03Kontenplan, belege, setBelege, leasingvertraege, setLeasingvertraege, loading, error, fetchAll, lieferantenMap, steuerperiodenMap, skr03KontenplanMap, belegeMap };
 }

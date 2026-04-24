@@ -3,19 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'altcha-widget': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
-        challengeurl?: string;
-        auto?: string;
-        hidelogo?: boolean;
-        hidefooter?: boolean;
-      }, HTMLElement>;
-    }
-  }
-}
-
 // Empty PROXY_BASE → relative URLs (dashboard and form-proxy share the domain).
 const PROXY_BASE = '';
 const APP_ID = '69eb4c352d3b185b8f5fd7fa';

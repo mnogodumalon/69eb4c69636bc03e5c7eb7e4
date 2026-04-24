@@ -1,17 +1,17 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useDashboardData } from '@/hooks/useDashboardData';
-import type { Skr03Kontenplan, Steuerperioden, Lieferanten, Belege, Belegpositionen, Leasingvertraege } from '@/types/app';
+import type { Lieferanten, Steuerperioden, Belegpositionen, Skr03Kontenplan, Belege, Leasingvertraege } from '@/types/app';
 import { LivingAppsService, extractRecordId, cleanFieldsForApi } from '@/services/livingAppsService';
-import { Skr03KontenplanDialog } from '@/components/dialogs/Skr03KontenplanDialog';
-import { Skr03KontenplanViewDialog } from '@/components/dialogs/Skr03KontenplanViewDialog';
-import { SteuerperiodenDialog } from '@/components/dialogs/SteuerperiodenDialog';
-import { SteuerperiodenViewDialog } from '@/components/dialogs/SteuerperiodenViewDialog';
 import { LieferantenDialog } from '@/components/dialogs/LieferantenDialog';
 import { LieferantenViewDialog } from '@/components/dialogs/LieferantenViewDialog';
-import { BelegeDialog } from '@/components/dialogs/BelegeDialog';
-import { BelegeViewDialog } from '@/components/dialogs/BelegeViewDialog';
+import { SteuerperiodenDialog } from '@/components/dialogs/SteuerperiodenDialog';
+import { SteuerperiodenViewDialog } from '@/components/dialogs/SteuerperiodenViewDialog';
 import { BelegpositionenDialog } from '@/components/dialogs/BelegpositionenDialog';
 import { BelegpositionenViewDialog } from '@/components/dialogs/BelegpositionenViewDialog';
+import { Skr03KontenplanDialog } from '@/components/dialogs/Skr03KontenplanDialog';
+import { Skr03KontenplanViewDialog } from '@/components/dialogs/Skr03KontenplanViewDialog';
+import { BelegeDialog } from '@/components/dialogs/BelegeDialog';
+import { BelegeViewDialog } from '@/components/dialogs/BelegeViewDialog';
 import { LeasingvertraegeDialog } from '@/components/dialogs/LeasingvertraegeDialog';
 import { LeasingvertraegeViewDialog } from '@/components/dialogs/LeasingvertraegeViewDialog';
 import { BulkEditDialog } from '@/components/dialogs/BulkEditDialog';
@@ -40,19 +40,6 @@ function fmtDate(d?: string) {
 }
 
 // Field metadata per entity for bulk edit and column filters
-const SKR03KONTENPLAN_FIELDS = [
-  { key: 'kontonummer', label: 'Kontonummer', type: 'string/text' },
-  { key: 'kontobezeichnung', label: 'Kontobezeichnung', type: 'string/text' },
-  { key: 'kontoklasse', label: 'Kontoklasse', type: 'string/text' },
-];
-const STEUERPERIODEN_FIELDS = [
-  { key: 'bezeichnung', label: 'Bezeichnung', type: 'string/text' },
-  { key: 'steuerjahr', label: 'Steuerjahr', type: 'number' },
-  { key: 'quartal', label: 'Quartal', type: 'lookup/select', options: [{ key: 'q1', label: 'Q1' }, { key: 'q2', label: 'Q2' }, { key: 'q3', label: 'Q3' }, { key: 'q4', label: 'Q4' }] },
-  { key: 'von', label: 'Von', type: 'date/date' },
-  { key: 'bis', label: 'Bis', type: 'date/date' },
-  { key: 'status_periode', label: 'Status', type: 'lookup/select', options: [{ key: 'offen', label: 'Offen' }, { key: 'abgeschlossen', label: 'Abgeschlossen' }, { key: 'eingereicht', label: 'Eingereicht' }] },
-];
 const LIEFERANTEN_FIELDS = [
   { key: 'name', label: 'Name', type: 'string/text' },
   { key: 'strasse', label: 'Straße', type: 'string/text' },
@@ -62,6 +49,33 @@ const LIEFERANTEN_FIELDS = [
   { key: 'steuernummer', label: 'Steuernummer', type: 'string/text' },
   { key: 'standard_skr03_konto', label: 'Standard-SKR03-Konto', type: 'applookup/select', targetEntity: 'skr03_kontenplan', targetAppId: 'SKR03_KONTENPLAN', displayField: 'kontonummer' },
   { key: 'bemerkung_lieferant', label: 'Bemerkung', type: 'string/textarea' },
+];
+const STEUERPERIODEN_FIELDS = [
+  { key: 'bezeichnung', label: 'Bezeichnung', type: 'string/text' },
+  { key: 'steuerjahr', label: 'Steuerjahr', type: 'number' },
+  { key: 'quartal', label: 'Quartal', type: 'lookup/select', options: [{ key: 'q1', label: 'Q1' }, { key: 'q2', label: 'Q2' }, { key: 'q3', label: 'Q3' }, { key: 'q4', label: 'Q4' }] },
+  { key: 'von', label: 'Von', type: 'date/date' },
+  { key: 'bis', label: 'Bis', type: 'date/date' },
+  { key: 'status_periode', label: 'Status', type: 'lookup/select', options: [{ key: 'offen', label: 'Offen' }, { key: 'abgeschlossen', label: 'Abgeschlossen' }, { key: 'eingereicht', label: 'Eingereicht' }] },
+];
+const BELEGPOSITIONEN_FIELDS = [
+  { key: 'beleg_ref', label: 'Beleg', type: 'applookup/select', targetEntity: 'belege', targetAppId: 'BELEGE', displayField: 'belegnummer_lieferant' },
+  { key: 'positionsnummer', label: 'Positionsnummer', type: 'number' },
+  { key: 'bezeichnung_pos', label: 'Bezeichnung', type: 'string/text' },
+  { key: 'menge', label: 'Menge', type: 'number' },
+  { key: 'einheit', label: 'Einheit', type: 'string/text' },
+  { key: 'einzelpreis_netto', label: 'Einzelpreis netto (EUR)', type: 'number' },
+  { key: 'nettobetrag_pos', label: 'Nettobetrag (EUR, berechnet: Menge × Einzelpreis)', type: 'number' },
+  { key: 'mwst_satz_pos', label: 'MwSt-Satz', type: 'lookup/radio', options: [{ key: 'mwst_0', label: '0%' }, { key: 'mwst_7', label: '7%' }, { key: 'mwst_19', label: '19%' }] },
+  { key: 'mwst_betrag_pos', label: 'MwSt-Betrag (EUR, berechnet)', type: 'number' },
+  { key: 'bruttobetrag_pos', label: 'Bruttobetrag (EUR, berechnet)', type: 'number' },
+  { key: 'skr03_konto_pos', label: 'SKR03-Konto Position', type: 'applookup/select', targetEntity: 'skr03_kontenplan', targetAppId: 'SKR03_KONTENPLAN', displayField: 'kontonummer' },
+  { key: 'bemerkung_pos', label: 'Bemerkung', type: 'string/text' },
+];
+const SKR03KONTENPLAN_FIELDS = [
+  { key: 'kontonummer', label: 'Kontonummer', type: 'string/text' },
+  { key: 'kontobezeichnung', label: 'Kontobezeichnung', type: 'string/text' },
+  { key: 'kontoklasse', label: 'Kontoklasse', type: 'string/text' },
 ];
 const BELEGE_FIELDS = [
   { key: 'beleg_datei', label: 'Beleg-Datei (PDF, JPG, PNG)', type: 'file' },
@@ -87,20 +101,6 @@ const BELEGE_FIELDS = [
   { key: 'verarbeitungsstatus', label: 'Verarbeitungsstatus', type: 'lookup/select', options: [{ key: 'pruefung_erforderlich', label: 'Prüfung erforderlich' }, { key: 'geprueft', label: 'Geprüft' }, { key: 'gebucht', label: 'Gebucht' }, { key: 'archiviert', label: 'Archiviert' }, { key: 'hochgeladen', label: 'Hochgeladen' }, { key: 'ocr_ausstehend', label: 'OCR ausstehend' }] },
   { key: 'gesperrt', label: 'Gesperrt (automatisch bei Status \'Gebucht\')', type: 'bool' },
 ];
-const BELEGPOSITIONEN_FIELDS = [
-  { key: 'beleg_ref', label: 'Beleg', type: 'applookup/select', targetEntity: 'belege', targetAppId: 'BELEGE', displayField: 'belegnummer_lieferant' },
-  { key: 'positionsnummer', label: 'Positionsnummer', type: 'number' },
-  { key: 'bezeichnung_pos', label: 'Bezeichnung', type: 'string/text' },
-  { key: 'menge', label: 'Menge', type: 'number' },
-  { key: 'einheit', label: 'Einheit', type: 'string/text' },
-  { key: 'einzelpreis_netto', label: 'Einzelpreis netto (EUR)', type: 'number' },
-  { key: 'nettobetrag_pos', label: 'Nettobetrag (EUR, berechnet: Menge × Einzelpreis)', type: 'number' },
-  { key: 'mwst_satz_pos', label: 'MwSt-Satz', type: 'lookup/radio', options: [{ key: 'mwst_0', label: '0%' }, { key: 'mwst_7', label: '7%' }, { key: 'mwst_19', label: '19%' }] },
-  { key: 'mwst_betrag_pos', label: 'MwSt-Betrag (EUR, berechnet)', type: 'number' },
-  { key: 'bruttobetrag_pos', label: 'Bruttobetrag (EUR, berechnet)', type: 'number' },
-  { key: 'skr03_konto_pos', label: 'SKR03-Konto Position', type: 'applookup/select', targetEntity: 'skr03_kontenplan', targetAppId: 'SKR03_KONTENPLAN', displayField: 'kontonummer' },
-  { key: 'bemerkung_pos', label: 'Bemerkung', type: 'string/text' },
-];
 const LEASINGVERTRAEGE_FIELDS = [
   { key: 'fahrzeugbezeichnung', label: 'Fahrzeugbezeichnung', type: 'string/text' },
   { key: 'kennzeichen', label: 'Kennzeichen', type: 'string/text' },
@@ -122,11 +122,11 @@ const LEASINGVERTRAEGE_FIELDS = [
 ];
 
 const ENTITY_TABS = [
-  { key: 'skr03_kontenplan', label: 'SKR03-Kontenplan', pascal: 'Skr03Kontenplan' },
-  { key: 'steuerperioden', label: 'Steuerperioden', pascal: 'Steuerperioden' },
   { key: 'lieferanten', label: 'Lieferanten', pascal: 'Lieferanten' },
-  { key: 'belege', label: 'Belege', pascal: 'Belege' },
+  { key: 'steuerperioden', label: 'Steuerperioden', pascal: 'Steuerperioden' },
   { key: 'belegpositionen', label: 'Belegpositionen', pascal: 'Belegpositionen' },
+  { key: 'skr03_kontenplan', label: 'SKR03-Kontenplan', pascal: 'Skr03Kontenplan' },
+  { key: 'belege', label: 'Belege', pascal: 'Belege' },
   { key: 'leasingvertraege', label: 'Leasingverträge', pascal: 'Leasingvertraege' },
 ] as const;
 
@@ -136,21 +136,21 @@ export default function AdminPage() {
   const data = useDashboardData();
   const { loading, error, fetchAll } = data;
 
-  const [activeTab, setActiveTab] = useState<EntityKey>('skr03_kontenplan');
+  const [activeTab, setActiveTab] = useState<EntityKey>('lieferanten');
   const [selectedIds, setSelectedIds] = useState<Record<EntityKey, Set<string>>>(() => ({
-    'skr03_kontenplan': new Set(),
-    'steuerperioden': new Set(),
     'lieferanten': new Set(),
-    'belege': new Set(),
+    'steuerperioden': new Set(),
     'belegpositionen': new Set(),
+    'skr03_kontenplan': new Set(),
+    'belege': new Set(),
     'leasingvertraege': new Set(),
   }));
   const [filters, setFilters] = useState<Record<EntityKey, Record<string, string>>>(() => ({
-    'skr03_kontenplan': {},
-    'steuerperioden': {},
     'lieferanten': {},
-    'belege': {},
+    'steuerperioden': {},
     'belegpositionen': {},
+    'skr03_kontenplan': {},
+    'belege': {},
     'leasingvertraege': {},
   }));
   const [showFilters, setShowFilters] = useState(false);
@@ -166,11 +166,11 @@ export default function AdminPage() {
 
   const getRecords = useCallback((entity: EntityKey) => {
     switch (entity) {
-      case 'skr03_kontenplan': return (data as any).skr03Kontenplan as Skr03Kontenplan[] ?? [];
-      case 'steuerperioden': return (data as any).steuerperioden as Steuerperioden[] ?? [];
       case 'lieferanten': return (data as any).lieferanten as Lieferanten[] ?? [];
-      case 'belege': return (data as any).belege as Belege[] ?? [];
+      case 'steuerperioden': return (data as any).steuerperioden as Steuerperioden[] ?? [];
       case 'belegpositionen': return (data as any).belegpositionen as Belegpositionen[] ?? [];
+      case 'skr03_kontenplan': return (data as any).skr03Kontenplan as Skr03Kontenplan[] ?? [];
+      case 'belege': return (data as any).belege as Belege[] ?? [];
       case 'leasingvertraege': return (data as any).leasingvertraege as Leasingvertraege[] ?? [];
       default: return [];
     }
@@ -182,13 +182,13 @@ export default function AdminPage() {
       case 'lieferanten':
         lists.skr03_kontenplanList = (data as any).skr03Kontenplan ?? [];
         break;
+      case 'belegpositionen':
+        lists.belegeList = (data as any).belege ?? [];
+        lists.skr03_kontenplanList = (data as any).skr03Kontenplan ?? [];
+        break;
       case 'belege':
         lists.lieferantenList = (data as any).lieferanten ?? [];
         lists.steuerperiodenList = (data as any).steuerperioden ?? [];
-        lists.skr03_kontenplanList = (data as any).skr03Kontenplan ?? [];
-        break;
-      case 'belegpositionen':
-        lists.belegeList = (data as any).belege ?? [];
         lists.skr03_kontenplanList = (data as any).skr03Kontenplan ?? [];
         break;
       case 'leasingvertraege':
@@ -209,6 +209,14 @@ export default function AdminPage() {
       const match = (lists.skr03_kontenplanList ?? []).find((r: any) => r.record_id === id);
       return match?.fields.kontonummer ?? '—';
     }
+    if (entity === 'belegpositionen' && fieldKey === 'beleg_ref') {
+      const match = (lists.belegeList ?? []).find((r: any) => r.record_id === id);
+      return match?.fields.belegnummer_lieferant ?? '—';
+    }
+    if (entity === 'belegpositionen' && fieldKey === 'skr03_konto_pos') {
+      const match = (lists.skr03_kontenplanList ?? []).find((r: any) => r.record_id === id);
+      return match?.fields.kontonummer ?? '—';
+    }
     if (entity === 'belege' && fieldKey === 'lieferant_ref') {
       const match = (lists.lieferantenList ?? []).find((r: any) => r.record_id === id);
       return match?.fields.name ?? '—';
@@ -218,14 +226,6 @@ export default function AdminPage() {
       return match?.fields.bezeichnung ?? '—';
     }
     if (entity === 'belege' && fieldKey === 'skr03_konto_beleg') {
-      const match = (lists.skr03_kontenplanList ?? []).find((r: any) => r.record_id === id);
-      return match?.fields.kontonummer ?? '—';
-    }
-    if (entity === 'belegpositionen' && fieldKey === 'beleg_ref') {
-      const match = (lists.belegeList ?? []).find((r: any) => r.record_id === id);
-      return match?.fields.belegnummer_lieferant ?? '—';
-    }
-    if (entity === 'belegpositionen' && fieldKey === 'skr03_konto_pos') {
       const match = (lists.skr03_kontenplanList ?? []).find((r: any) => r.record_id === id);
       return match?.fields.kontonummer ?? '—';
     }
@@ -246,11 +246,11 @@ export default function AdminPage() {
 
   const getFieldMeta = useCallback((entity: EntityKey) => {
     switch (entity) {
-      case 'skr03_kontenplan': return SKR03KONTENPLAN_FIELDS;
-      case 'steuerperioden': return STEUERPERIODEN_FIELDS;
       case 'lieferanten': return LIEFERANTEN_FIELDS;
-      case 'belege': return BELEGE_FIELDS;
+      case 'steuerperioden': return STEUERPERIODEN_FIELDS;
       case 'belegpositionen': return BELEGPOSITIONEN_FIELDS;
+      case 'skr03_kontenplan': return SKR03KONTENPLAN_FIELDS;
+      case 'belege': return BELEGE_FIELDS;
       case 'leasingvertraege': return LEASINGVERTRAEGE_FIELDS;
       default: return [];
     }
@@ -346,30 +346,30 @@ export default function AdminPage() {
 
   const getServiceMethods = useCallback((entity: EntityKey) => {
     switch (entity) {
-      case 'skr03_kontenplan': return {
-        create: (fields: any) => LivingAppsService.createSkr03KontenplanEntry(fields),
-        update: (id: string, fields: any) => LivingAppsService.updateSkr03KontenplanEntry(id, fields),
-        remove: (id: string) => LivingAppsService.deleteSkr03KontenplanEntry(id),
+      case 'lieferanten': return {
+        create: (fields: any) => LivingAppsService.createLieferantenEntry(fields),
+        update: (id: string, fields: any) => LivingAppsService.updateLieferantenEntry(id, fields),
+        remove: (id: string) => LivingAppsService.deleteLieferantenEntry(id),
       };
       case 'steuerperioden': return {
         create: (fields: any) => LivingAppsService.createSteuerperiodenEntry(fields),
         update: (id: string, fields: any) => LivingAppsService.updateSteuerperiodenEntry(id, fields),
         remove: (id: string) => LivingAppsService.deleteSteuerperiodenEntry(id),
       };
-      case 'lieferanten': return {
-        create: (fields: any) => LivingAppsService.createLieferantenEntry(fields),
-        update: (id: string, fields: any) => LivingAppsService.updateLieferantenEntry(id, fields),
-        remove: (id: string) => LivingAppsService.deleteLieferantenEntry(id),
+      case 'belegpositionen': return {
+        create: (fields: any) => LivingAppsService.createBelegpositionenEntry(fields),
+        update: (id: string, fields: any) => LivingAppsService.updateBelegpositionenEntry(id, fields),
+        remove: (id: string) => LivingAppsService.deleteBelegpositionenEntry(id),
+      };
+      case 'skr03_kontenplan': return {
+        create: (fields: any) => LivingAppsService.createSkr03KontenplanEntry(fields),
+        update: (id: string, fields: any) => LivingAppsService.updateSkr03KontenplanEntry(id, fields),
+        remove: (id: string) => LivingAppsService.deleteSkr03KontenplanEntry(id),
       };
       case 'belege': return {
         create: (fields: any) => LivingAppsService.createBelegeEntry(fields),
         update: (id: string, fields: any) => LivingAppsService.updateBelegeEntry(id, fields),
         remove: (id: string) => LivingAppsService.deleteBelegeEntry(id),
-      };
-      case 'belegpositionen': return {
-        create: (fields: any) => LivingAppsService.createBelegpositionenEntry(fields),
-        update: (id: string, fields: any) => LivingAppsService.updateBelegpositionenEntry(id, fields),
-        remove: (id: string) => LivingAppsService.deleteBelegpositionenEntry(id),
       };
       case 'leasingvertraege': return {
         create: (fields: any) => LivingAppsService.createLeasingvertraegeEntry(fields),
@@ -703,14 +703,15 @@ export default function AdminPage() {
         </Table>
       </div>
 
-      {(createEntity === 'skr03_kontenplan' || dialogState?.entity === 'skr03_kontenplan') && (
-        <Skr03KontenplanDialog
-          open={createEntity === 'skr03_kontenplan' || dialogState?.entity === 'skr03_kontenplan'}
+      {(createEntity === 'lieferanten' || dialogState?.entity === 'lieferanten') && (
+        <LieferantenDialog
+          open={createEntity === 'lieferanten' || dialogState?.entity === 'lieferanten'}
           onClose={() => { setCreateEntity(null); setDialogState(null); }}
-          onSubmit={dialogState?.entity === 'skr03_kontenplan' ? handleUpdate : (fields: any) => handleCreate('skr03_kontenplan', fields)}
-          defaultValues={dialogState?.entity === 'skr03_kontenplan' ? dialogState.record?.fields : undefined}
-          enablePhotoScan={AI_PHOTO_SCAN['Skr03Kontenplan']}
-          enablePhotoLocation={AI_PHOTO_LOCATION['Skr03Kontenplan']}
+          onSubmit={dialogState?.entity === 'lieferanten' ? handleUpdate : (fields: any) => handleCreate('lieferanten', fields)}
+          defaultValues={dialogState?.entity === 'lieferanten' ? dialogState.record?.fields : undefined}
+          skr03_kontenplanList={(data as any).skr03Kontenplan ?? []}
+          enablePhotoScan={AI_PHOTO_SCAN['Lieferanten']}
+          enablePhotoLocation={AI_PHOTO_LOCATION['Lieferanten']}
         />
       )}
       {(createEntity === 'steuerperioden' || dialogState?.entity === 'steuerperioden') && (
@@ -723,15 +724,26 @@ export default function AdminPage() {
           enablePhotoLocation={AI_PHOTO_LOCATION['Steuerperioden']}
         />
       )}
-      {(createEntity === 'lieferanten' || dialogState?.entity === 'lieferanten') && (
-        <LieferantenDialog
-          open={createEntity === 'lieferanten' || dialogState?.entity === 'lieferanten'}
+      {(createEntity === 'belegpositionen' || dialogState?.entity === 'belegpositionen') && (
+        <BelegpositionenDialog
+          open={createEntity === 'belegpositionen' || dialogState?.entity === 'belegpositionen'}
           onClose={() => { setCreateEntity(null); setDialogState(null); }}
-          onSubmit={dialogState?.entity === 'lieferanten' ? handleUpdate : (fields: any) => handleCreate('lieferanten', fields)}
-          defaultValues={dialogState?.entity === 'lieferanten' ? dialogState.record?.fields : undefined}
+          onSubmit={dialogState?.entity === 'belegpositionen' ? handleUpdate : (fields: any) => handleCreate('belegpositionen', fields)}
+          defaultValues={dialogState?.entity === 'belegpositionen' ? dialogState.record?.fields : undefined}
+          belegeList={(data as any).belege ?? []}
           skr03_kontenplanList={(data as any).skr03Kontenplan ?? []}
-          enablePhotoScan={AI_PHOTO_SCAN['Lieferanten']}
-          enablePhotoLocation={AI_PHOTO_LOCATION['Lieferanten']}
+          enablePhotoScan={AI_PHOTO_SCAN['Belegpositionen']}
+          enablePhotoLocation={AI_PHOTO_LOCATION['Belegpositionen']}
+        />
+      )}
+      {(createEntity === 'skr03_kontenplan' || dialogState?.entity === 'skr03_kontenplan') && (
+        <Skr03KontenplanDialog
+          open={createEntity === 'skr03_kontenplan' || dialogState?.entity === 'skr03_kontenplan'}
+          onClose={() => { setCreateEntity(null); setDialogState(null); }}
+          onSubmit={dialogState?.entity === 'skr03_kontenplan' ? handleUpdate : (fields: any) => handleCreate('skr03_kontenplan', fields)}
+          defaultValues={dialogState?.entity === 'skr03_kontenplan' ? dialogState.record?.fields : undefined}
+          enablePhotoScan={AI_PHOTO_SCAN['Skr03Kontenplan']}
+          enablePhotoLocation={AI_PHOTO_LOCATION['Skr03Kontenplan']}
         />
       )}
       {(createEntity === 'belege' || dialogState?.entity === 'belege') && (
@@ -747,18 +759,6 @@ export default function AdminPage() {
           enablePhotoLocation={AI_PHOTO_LOCATION['Belege']}
         />
       )}
-      {(createEntity === 'belegpositionen' || dialogState?.entity === 'belegpositionen') && (
-        <BelegpositionenDialog
-          open={createEntity === 'belegpositionen' || dialogState?.entity === 'belegpositionen'}
-          onClose={() => { setCreateEntity(null); setDialogState(null); }}
-          onSubmit={dialogState?.entity === 'belegpositionen' ? handleUpdate : (fields: any) => handleCreate('belegpositionen', fields)}
-          defaultValues={dialogState?.entity === 'belegpositionen' ? dialogState.record?.fields : undefined}
-          belegeList={(data as any).belege ?? []}
-          skr03_kontenplanList={(data as any).skr03Kontenplan ?? []}
-          enablePhotoScan={AI_PHOTO_SCAN['Belegpositionen']}
-          enablePhotoLocation={AI_PHOTO_LOCATION['Belegpositionen']}
-        />
-      )}
       {(createEntity === 'leasingvertraege' || dialogState?.entity === 'leasingvertraege') && (
         <LeasingvertraegeDialog
           open={createEntity === 'leasingvertraege' || dialogState?.entity === 'leasingvertraege'}
@@ -771,12 +771,13 @@ export default function AdminPage() {
           enablePhotoLocation={AI_PHOTO_LOCATION['Leasingvertraege']}
         />
       )}
-      {viewState?.entity === 'skr03_kontenplan' && (
-        <Skr03KontenplanViewDialog
-          open={viewState?.entity === 'skr03_kontenplan'}
+      {viewState?.entity === 'lieferanten' && (
+        <LieferantenViewDialog
+          open={viewState?.entity === 'lieferanten'}
           onClose={() => setViewState(null)}
           record={viewState?.record}
-          onEdit={(r: any) => { setViewState(null); setDialogState({ entity: 'skr03_kontenplan', record: r }); }}
+          onEdit={(r: any) => { setViewState(null); setDialogState({ entity: 'lieferanten', record: r }); }}
+          skr03_kontenplanList={(data as any).skr03Kontenplan ?? []}
         />
       )}
       {viewState?.entity === 'steuerperioden' && (
@@ -787,13 +788,22 @@ export default function AdminPage() {
           onEdit={(r: any) => { setViewState(null); setDialogState({ entity: 'steuerperioden', record: r }); }}
         />
       )}
-      {viewState?.entity === 'lieferanten' && (
-        <LieferantenViewDialog
-          open={viewState?.entity === 'lieferanten'}
+      {viewState?.entity === 'belegpositionen' && (
+        <BelegpositionenViewDialog
+          open={viewState?.entity === 'belegpositionen'}
           onClose={() => setViewState(null)}
           record={viewState?.record}
-          onEdit={(r: any) => { setViewState(null); setDialogState({ entity: 'lieferanten', record: r }); }}
+          onEdit={(r: any) => { setViewState(null); setDialogState({ entity: 'belegpositionen', record: r }); }}
+          belegeList={(data as any).belege ?? []}
           skr03_kontenplanList={(data as any).skr03Kontenplan ?? []}
+        />
+      )}
+      {viewState?.entity === 'skr03_kontenplan' && (
+        <Skr03KontenplanViewDialog
+          open={viewState?.entity === 'skr03_kontenplan'}
+          onClose={() => setViewState(null)}
+          record={viewState?.record}
+          onEdit={(r: any) => { setViewState(null); setDialogState({ entity: 'skr03_kontenplan', record: r }); }}
         />
       )}
       {viewState?.entity === 'belege' && (
@@ -804,16 +814,6 @@ export default function AdminPage() {
           onEdit={(r: any) => { setViewState(null); setDialogState({ entity: 'belege', record: r }); }}
           lieferantenList={(data as any).lieferanten ?? []}
           steuerperiodenList={(data as any).steuerperioden ?? []}
-          skr03_kontenplanList={(data as any).skr03Kontenplan ?? []}
-        />
-      )}
-      {viewState?.entity === 'belegpositionen' && (
-        <BelegpositionenViewDialog
-          open={viewState?.entity === 'belegpositionen'}
-          onClose={() => setViewState(null)}
-          record={viewState?.record}
-          onEdit={(r: any) => { setViewState(null); setDialogState({ entity: 'belegpositionen', record: r }); }}
-          belegeList={(data as any).belege ?? []}
           skr03_kontenplanList={(data as any).skr03Kontenplan ?? []}
         />
       )}

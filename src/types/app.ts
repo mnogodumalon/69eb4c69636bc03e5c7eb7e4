@@ -3,14 +3,19 @@
 export type LookupValue = { key: string; label: string };
 export type GeoLocation = { lat: number; long: number; info?: string };
 
-export interface Skr03Kontenplan {
+export interface Lieferanten {
   record_id: string;
   createdat: string;
   updatedat: string | null;
   fields: {
-    kontonummer?: string;
-    kontobezeichnung?: string;
-    kontoklasse?: string;
+    name?: string;
+    strasse?: string;
+    plz?: string;
+    ort?: string;
+    ust_idnr?: string;
+    steuernummer?: string;
+    standard_skr03_konto?: string; // applookup -> URL zu 'Skr03Kontenplan' Record
+    bemerkung_lieferant?: string;
   };
 }
 
@@ -28,19 +33,34 @@ export interface Steuerperioden {
   };
 }
 
-export interface Lieferanten {
+export interface Belegpositionen {
   record_id: string;
   createdat: string;
   updatedat: string | null;
   fields: {
-    name?: string;
-    strasse?: string;
-    plz?: string;
-    ort?: string;
-    ust_idnr?: string;
-    steuernummer?: string;
-    standard_skr03_konto?: string; // applookup -> URL zu 'Skr03Kontenplan' Record
-    bemerkung_lieferant?: string;
+    beleg_ref?: string; // applookup -> URL zu 'Belege' Record
+    positionsnummer?: number;
+    bezeichnung_pos?: string;
+    menge?: number;
+    einheit?: string;
+    einzelpreis_netto?: number;
+    nettobetrag_pos?: number;
+    mwst_satz_pos?: LookupValue;
+    mwst_betrag_pos?: number;
+    bruttobetrag_pos?: number;
+    skr03_konto_pos?: string; // applookup -> URL zu 'Skr03Kontenplan' Record
+    bemerkung_pos?: string;
+  };
+}
+
+export interface Skr03Kontenplan {
+  record_id: string;
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    kontonummer?: string;
+    kontobezeichnung?: string;
+    kontoklasse?: string;
   };
 }
 
@@ -74,26 +94,6 @@ export interface Belege {
   };
 }
 
-export interface Belegpositionen {
-  record_id: string;
-  createdat: string;
-  updatedat: string | null;
-  fields: {
-    beleg_ref?: string; // applookup -> URL zu 'Belege' Record
-    positionsnummer?: number;
-    bezeichnung_pos?: string;
-    menge?: number;
-    einheit?: string;
-    einzelpreis_netto?: number;
-    nettobetrag_pos?: number;
-    mwst_satz_pos?: LookupValue;
-    mwst_betrag_pos?: number;
-    bruttobetrag_pos?: number;
-    skr03_konto_pos?: string; // applookup -> URL zu 'Skr03Kontenplan' Record
-    bemerkung_pos?: string;
-  };
-}
-
 export interface Leasingvertraege {
   record_id: string;
   createdat: string;
@@ -120,11 +120,11 @@ export interface Leasingvertraege {
 }
 
 export const APP_IDS = {
-  SKR03_KONTENPLAN: '69eb4c352d3b185b8f5fd7fa',
-  STEUERPERIODEN: '69eb4c3d238c00be8a7ea876',
   LIEFERANTEN: '69eb4c3e268be590a3c278b2',
-  BELEGE: '69eb4c3ff1779a5204114e53',
+  STEUERPERIODEN: '69eb4c3d238c00be8a7ea876',
   BELEGPOSITIONEN: '69eb4c41284fb47dd4dddbcf',
+  SKR03_KONTENPLAN: '69eb4c352d3b185b8f5fd7fa',
+  BELEGE: '69eb4c3ff1779a5204114e53',
   LEASINGVERTRAEGE: '69eb4c42bac37ace4aba4d62',
 } as const;
 
@@ -133,6 +133,9 @@ export const LOOKUP_OPTIONS: Record<string, Record<string, {key: string, label: 
   'steuerperioden': {
     quartal: [{ key: "q1", label: "Q1" }, { key: "q2", label: "Q2" }, { key: "q3", label: "Q3" }, { key: "q4", label: "Q4" }],
     status_periode: [{ key: "offen", label: "Offen" }, { key: "abgeschlossen", label: "Abgeschlossen" }, { key: "eingereicht", label: "Eingereicht" }],
+  },
+  'belegpositionen': {
+    mwst_satz_pos: [{ key: "mwst_0", label: "0%" }, { key: "mwst_7", label: "7%" }, { key: "mwst_19", label: "19%" }],
   },
   'belege': {
     belegtyp: [{ key: "rechnung", label: "Rechnung" }, { key: "quittung", label: "Quittung" }, { key: "kassenbon", label: "Kassenbon" }, { key: "gutschrift", label: "Gutschrift" }, { key: "kontoauszug", label: "Kontoauszug" }, { key: "sonstiges", label: "Sonstiges" }],
@@ -144,28 +147,12 @@ export const LOOKUP_OPTIONS: Record<string, Record<string, {key: string, label: 
     ocr_status: [{ key: "ausstehend", label: "Ausstehend" }, { key: "verarbeitet", label: "Verarbeitet" }, { key: "fehlgeschlagen", label: "Fehlgeschlagen" }, { key: "manuell_korrigiert", label: "Manuell korrigiert" }],
     verarbeitungsstatus: [{ key: "pruefung_erforderlich", label: "Prüfung erforderlich" }, { key: "geprueft", label: "Geprüft" }, { key: "gebucht", label: "Gebucht" }, { key: "archiviert", label: "Archiviert" }, { key: "hochgeladen", label: "Hochgeladen" }, { key: "ocr_ausstehend", label: "OCR ausstehend" }],
   },
-  'belegpositionen': {
-    mwst_satz_pos: [{ key: "mwst_0", label: "0%" }, { key: "mwst_7", label: "7%" }, { key: "mwst_19", label: "19%" }],
-  },
   'leasingvertraege': {
     private_nutzungsmethode: [{ key: "ein_prozent", label: "1%-Regel" }, { key: "fahrtenbuch", label: "Fahrtenbuch" }],
   },
 };
 
 export const FIELD_TYPES: Record<string, Record<string, string>> = {
-  'skr03_kontenplan': {
-    'kontonummer': 'string/text',
-    'kontobezeichnung': 'string/text',
-    'kontoklasse': 'string/text',
-  },
-  'steuerperioden': {
-    'bezeichnung': 'string/text',
-    'steuerjahr': 'number',
-    'quartal': 'lookup/select',
-    'von': 'date/date',
-    'bis': 'date/date',
-    'status_periode': 'lookup/select',
-  },
   'lieferanten': {
     'name': 'string/text',
     'strasse': 'string/text',
@@ -175,6 +162,33 @@ export const FIELD_TYPES: Record<string, Record<string, string>> = {
     'steuernummer': 'string/text',
     'standard_skr03_konto': 'applookup/select',
     'bemerkung_lieferant': 'string/textarea',
+  },
+  'steuerperioden': {
+    'bezeichnung': 'string/text',
+    'steuerjahr': 'number',
+    'quartal': 'lookup/select',
+    'von': 'date/date',
+    'bis': 'date/date',
+    'status_periode': 'lookup/select',
+  },
+  'belegpositionen': {
+    'beleg_ref': 'applookup/select',
+    'positionsnummer': 'number',
+    'bezeichnung_pos': 'string/text',
+    'menge': 'number',
+    'einheit': 'string/text',
+    'einzelpreis_netto': 'number',
+    'nettobetrag_pos': 'number',
+    'mwst_satz_pos': 'lookup/radio',
+    'mwst_betrag_pos': 'number',
+    'bruttobetrag_pos': 'number',
+    'skr03_konto_pos': 'applookup/select',
+    'bemerkung_pos': 'string/text',
+  },
+  'skr03_kontenplan': {
+    'kontonummer': 'string/text',
+    'kontobezeichnung': 'string/text',
+    'kontoklasse': 'string/text',
   },
   'belege': {
     'beleg_datei': 'file',
@@ -199,20 +213,6 @@ export const FIELD_TYPES: Record<string, Record<string, string>> = {
     'ocr_status': 'lookup/select',
     'verarbeitungsstatus': 'lookup/select',
     'gesperrt': 'bool',
-  },
-  'belegpositionen': {
-    'beleg_ref': 'applookup/select',
-    'positionsnummer': 'number',
-    'bezeichnung_pos': 'string/text',
-    'menge': 'number',
-    'einheit': 'string/text',
-    'einzelpreis_netto': 'number',
-    'nettobetrag_pos': 'number',
-    'mwst_satz_pos': 'lookup/radio',
-    'mwst_betrag_pos': 'number',
-    'bruttobetrag_pos': 'number',
-    'skr03_konto_pos': 'applookup/select',
-    'bemerkung_pos': 'string/text',
   },
   'leasingvertraege': {
     'fahrzeugbezeichnung': 'string/text',
@@ -242,9 +242,9 @@ type StripLookup<T> = {
 };
 
 // Helper Types for creating new records (lookup fields as plain strings for API)
-export type CreateSkr03Kontenplan = StripLookup<Skr03Kontenplan['fields']>;
-export type CreateSteuerperioden = StripLookup<Steuerperioden['fields']>;
 export type CreateLieferanten = StripLookup<Lieferanten['fields']>;
-export type CreateBelege = StripLookup<Belege['fields']>;
+export type CreateSteuerperioden = StripLookup<Steuerperioden['fields']>;
 export type CreateBelegpositionen = StripLookup<Belegpositionen['fields']>;
+export type CreateSkr03Kontenplan = StripLookup<Skr03Kontenplan['fields']>;
+export type CreateBelege = StripLookup<Belege['fields']>;
 export type CreateLeasingvertraege = StripLookup<Leasingvertraege['fields']>;
