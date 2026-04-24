@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "forms": [
+    {
+      "entity": "skr03_kontenplan",
+      "app_id": "69eb4c352d3b185b8f5fd7fa",
+      "path": "/rest/apps/69eb4c352d3b185b8f5fd7fa/records",
+      "allowed_fields": [
+        "kontonummer",
+        "kontobezeichnung",
+        "kontoklasse"
+      ],
+      "pow": true,
+      "pow_difficulty": 50000,
+      "title": "SKR03-Kontenplan — Formular"
+    },
+    {
+      "entity": "steuerperioden",
+      "app_id": "69eb4c3d238c00be8a7ea876",
+      "path": "/rest/apps/69eb4c3d238c00be8a7ea876/records",
+      "allowed_fields": [
+        "bezeichnung",
+        "steuerjahr",
+        "quartal",
+        "von",
+        "bis",
+        "status_periode"
+      ],
+      "pow": true,
+      "pow_difficulty": 50000,
+      "title": "Steuerperioden — Formular"
+    },
+    {
+      "entity": "lieferanten",
+      "app_id": "69eb4c3e268be590a3c278b2",
+      "path": "/rest/apps/69eb4c3e268be590a3c278b2/records",
+      "allowed_fields": [
+        "name",
+        "strasse",
+        "plz",
+        "ort",
+        "ust_idnr",
+        "steuernummer",
+        "bemerkung_lieferant"
+      ],
+      "pow": true,
+      "pow_difficulty": 50000,
+      "title": "Lieferanten — Formular"
+    },
+    {
+      "entity": "belege",
+      "app_id": "69eb4c3ff1779a5204114e53",
+      "path": "/rest/apps/69eb4c3ff1779a5204114e53/records",
+      "allowed_fields": [
+        "belegnummer_lieferant",
+        "rechnungsdatum",
+        "faelligkeitsdatum",
+        "buchungsdatum",
+        "upload_datum",
+        "belegtyp",
+        "dokumentklassifikation",
+        "nettobetrag",
+        "mwst_satz",
+        "mwst_betrag",
+        "bruttobetrag",
+        "waehrung",
+        "zahlungsart",
+        "zahlungsstatus",
+        "bemerkungen_beleg",
+        "ocr_status",
+        "verarbeitungsstatus",
+        "gesperrt"
+      ],
+      "pow": true,
+      "pow_difficulty": 50000,
+      "title": "Belege — Formular"
+    },
+    {
+      "entity": "belegpositionen",
+      "app_id": "69eb4c41284fb47dd4dddbcf",
+      "path": "/rest/apps/69eb4c41284fb47dd4dddbcf/records",
+      "allowed_fields": [
+        "positionsnummer",
+        "bezeichnung_pos",
+        "menge",
+        "einheit",
+        "einzelpreis_netto",
+        "nettobetrag_pos",
+        "mwst_satz_pos",
+        "mwst_betrag_pos",
+        "bruttobetrag_pos",
+        "bemerkung_pos"
+      ],
+      "pow": true,
+      "pow_difficulty": 50000,
+      "title": "Belegpositionen — Formular"
+    },
+    {
+      "entity": "leasingvertraege",
+      "app_id": "69eb4c42bac37ace4aba4d62",
+      "path": "/rest/apps/69eb4c42bac37ace4aba4d62/records",
+      "allowed_fields": [
+        "fahrzeugbezeichnung",
+        "kennzeichen",
+        "leasingvertragsnummer",
+        "leasingbeginn",
+        "leasingende",
+        "leasingrate_brutto",
+        "listenpreis_brutto",
+        "private_nutzungsmethode",
+        "privatanteil_prozent",
+        "nettoleasingrate",
+        "mwst_aus_leasingrate",
+        "berechnungsgrundlage_ein_prozent",
+        "mwst_anteil_rueckfuehrung",
+        "mwst_rueckfuehrung_buchungsbetrag"
+      ],
+      "pow": true,
+      "pow_difficulty": 50000,
+      "title": "Leasingverträge — Formular"
+    }
+  ]
+}
