@@ -17,7 +17,8 @@ import {
   IconAlertCircle, IconTool, IconRefresh, IconCheck,
   IconPlus, IconPencil, IconTrash, IconReceipt, IconClock,
   IconCircleCheck, IconArchive, IconFilter, IconFileInvoice,
-  IconCurrencyEuro, IconUsers, IconCalendar,
+  IconCurrencyEuro, IconUsers, IconCalendar, IconChevronRight,
+  IconUpload, IconLock,
 } from '@tabler/icons-react';
 import {
   Select,
@@ -174,6 +175,30 @@ export default function DashboardOverview() {
 
   return (
     <div className="space-y-6">
+      {/* Intent Workflows */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <a href="#/intents/beleg-erfassen" className="bg-card border border-border rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 border-l-4 border-l-primary no-underline">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <IconUpload size={20} className="text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate">Beleg erfassen</p>
+            <p className="text-xs text-muted-foreground truncate">Lieferant wählen → Periode → Beleg mit Positionen anlegen</p>
+          </div>
+          <IconChevronRight size={16} className="text-muted-foreground shrink-0" />
+        </a>
+        <a href="#/intents/steuerperiode-abschliessen" className="bg-card border border-border rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 border-l-4 border-l-primary no-underline">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <IconLock size={20} className="text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate">Steuerperiode abschließen</p>
+            <p className="text-xs text-muted-foreground truncate">Belege prüfen, Vollständigkeit kontrollieren und Periode schließen</p>
+          </div>
+          <IconChevronRight size={16} className="text-muted-foreground shrink-0" />
+        </a>
+      </div>
+
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>

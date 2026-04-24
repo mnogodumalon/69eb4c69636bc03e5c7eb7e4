@@ -5,7 +5,6 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ErrorBusProvider } from '@/components/ErrorBus';
 import { Layout } from '@/components/Layout';
 import DashboardOverview from '@/pages/DashboardOverview';
-import { WorkflowPlaceholders } from '@/components/WorkflowPlaceholders';
 import AdminPage from '@/pages/AdminPage';
 import Skr03KontenplanPage from '@/pages/Skr03KontenplanPage';
 import SteuerperiodenPage from '@/pages/SteuerperiodenPage';
@@ -22,6 +21,9 @@ import PublicFormLeasingvertraege from '@/pages/public/PublicForm_Leasingvertrae
 // <public:imports>
 // </public:imports>
 // <custom:imports>
+import { lazy, Suspense } from 'react';
+const BelegErfassenPage = lazy(() => import('@/pages/intents/BelegErfassenPage'));
+const SteuerperiodeAbschliessenPage = lazy(() => import('@/pages/intents/SteuerperiodeAbschliessenPage'));
 // </custom:imports>
 
 export default function App() {
@@ -40,7 +42,7 @@ export default function App() {
               {/* <public:routes> */}
               {/* </public:routes> */}
               <Route element={<Layout />}>
-                <Route index element={<><div className="mb-8"><WorkflowPlaceholders /></div><DashboardOverview /></>} />
+                <Route index element={<DashboardOverview />} />
                 <Route path="skr03-kontenplan" element={<Skr03KontenplanPage />} />
                 <Route path="steuerperioden" element={<SteuerperiodenPage />} />
                 <Route path="lieferanten" element={<LieferantenPage />} />
@@ -49,6 +51,8 @@ export default function App() {
                 <Route path="leasingvertraege" element={<LeasingvertraegePage />} />
                 <Route path="admin" element={<AdminPage />} />
                 {/* <custom:routes> */}
+                <Route path="intents/beleg-erfassen" element={<Suspense fallback={null}><BelegErfassenPage /></Suspense>} />
+                <Route path="intents/steuerperiode-abschliessen" element={<Suspense fallback={null}><SteuerperiodeAbschliessenPage /></Suspense>} />
                 {/* </custom:routes> */}
               </Route>
             </Routes>
